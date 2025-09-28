@@ -6,7 +6,7 @@ function Init()
 	local m = NewWebsiteModule()
 	m.ID                       = 'bdf2eb4381a7403ca93d144b9dbc0d0a'
 	m.Name                     = 'Com-X'
-	m.RootURL                  = 'https://comx.life'
+	m.RootURL                  = 'https://com-x.life'
 	m.Category                 = 'Russian'
 	m.OnGetDirectoryPageNumber = 'GetDirectoryPageNumber'
 	m.OnGetNameAndLink         = 'GetNameAndLink'

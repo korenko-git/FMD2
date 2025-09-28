@@ -107,6 +107,8 @@ end
 function GetPageNumber()
 	local host, v, x = nil
 	local u = MaybeFillHost(MODULE.RootURL, URL)
+
+	HTTP.Reset()
 	HTTP.Cookies.Values['adult'] = URL:match('/reader/(%d+)/')
 
 	if not HTTP.GET(u) then return false end

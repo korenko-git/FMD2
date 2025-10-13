@@ -17,8 +17,6 @@ function Init()
 	
 	-- Initialize storage values
 	m.Storage['UserHash'] = ''
-	m.Storage['NewsID'] = ''
-	m.Storage['NewsCategory'] = ''
 end
 
 ----------------------------------------------------------------------------------------------------
@@ -110,17 +108,9 @@ function GetInfo()
         'Триває', 'Завершено|Закінчено', 'Призупинено|Пауза', 'Скасовано|Відмінено'
     )
 
-    MODULE.Storage['NewsID'] = x.XPathString('//div[@id="linkstocomics"]/@data-news_id')
-    MODULE.Storage['NewsCategory'] = x.XPathString('//div[@id="linkstocomics"]/@data-news_category')
-
-    return GetChapters()
-end
-
--- Get chapters for the current manga.
-function GetChapters()
-    local newsID = MODULE.Storage['NewsID']
-    local newsCategory = MODULE.Storage['NewsCategory']
-    local userHash = MODULE.Storage['UserHash']
+    -- Get chapters for the current manga.
+    local newsID = x.XPathString('//div[@id="linkstocomics"]/@data-news_id')
+    local newsCategory = x.XPathString('//div[@id="linkstocomics"]/@data-news_category')
     
     if not newsID or newsID == '' or not newsCategory or newsCategory == '' then
         print("Error: NewsID or NewsCategory is empty")
@@ -128,15 +118,6 @@ function GetChapters()
         return net_problem
     end
     
-    -- Ensure UserHash is available
-    if not userHash or userHash == '' then
-        if not GetUserHash() then
-            print("Error: Failed to obtain UserHash")
-            return net_problem
-        end
-        userHash = MODULE.Storage['UserHash']
-    end
-
     local postData = string.format(
         "action=show&news_id=%s&news_category=%s&this_link=&user_hash=%s",
         newsID, newsCategory, userHash
@@ -145,20 +126,9 @@ function GetChapters()
     HTTP.Reset()
     HTTP.Headers.Values['Referer'] = MaybeFillHost(MODULE.RootURL, URL)
 
-    local success = HTTP.POST(MODULE.RootURL .. '/engine/ajax/controller.php?mod=load_chapters', postData)
-    if not success then
-        print(postData)
-        print("HTTP POST failed")
-        return net_problem
-    end
+    if not HTTP.POST(MODULE.RootURL .. '/engine/ajax/controller.php?mod=load_chapters', postData) then return net_problem end
 
-    local docString = HTTP.Document.ToString()
-    if not docString or #docString == 0 then
-        print("Empty or invalid response from server")
-        return net_problem
-    end
-
-    local x = CreateTXQuery(docString)
+    local x = CreateTXQuery(HTTP.Document)
     x.XPathHREFAll('//div[@class="ltcitems"]/a', MANGAINFO.ChapterLinks, MANGAINFO.ChapterNames)
 
     return no_error
@@ -173,7 +143,7 @@ function GetPageNumber()
     if not userHash or userHash == '' then
         if not GetUserHash() then
             print("Error: Failed to obtain UserHash")
-            return net_problem
+            return false 
         end
         userHash = MODULE.Storage['UserHash']
     end
@@ -183,14 +153,10 @@ function GetPageNumber()
         '/engine/ajax/controller.php?mod=load_chapters_image&news_id=' .. chapID .. '&action=show&user_hash=' .. userHash
     )
 
-    print("Request URL:", u)
-
-	if not HTTP.GET(u) then return net_problem end
-
-    print("Response Status:", HTTP.Document)
+	if not HTTP.GET(u) then return false  end
 
 	local  x = CreateTXQuery(HTTP.Document)
     x.XPathStringAll('//ul[contains(@class,"xfieldimagegallery")]//img/@data-src', TASK.PageLinks)
 
-	return no_error
+	return true 
 end

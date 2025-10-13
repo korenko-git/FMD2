@@ -86,7 +86,7 @@ function _M.GetInfo()
 	MANGAINFO.Status    = MangaInfoStatusIfPos(x.XPathString('//div[@class="subject-meta"]'), 'выпуск продолжается', 'выпуск завершён')
 	MANGAINFO.Summary   = x.XPathString('(//div[@class="manga-description"])[1]')
 
-	x.XPathHREFAll('//table[@class="table table-hover"]//a', MANGAINFO.ChapterLinks, MANGAINFO.ChapterNames)
+	x.XPathHREFAll('//table[@class="table table-hover"]//a[not(contains(@href, "/internal/"))]', MANGAINFO.ChapterLinks, MANGAINFO.ChapterNames)
 	MANGAINFO.ChapterLinks.Reverse(); MANGAINFO.ChapterNames.Reverse()
 
 	HTTP.Reset()

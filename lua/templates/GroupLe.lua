@@ -11,7 +11,6 @@ local _M = {}
 DirectoryPagination = '/list?sortType=DATE_CREATE'
 DirectoryParameters = '&offset='
 DirectoryOffset     = 50
-KeepParameters      = false
 LoginUrl            = 'https://3.grouple.co'
 SITE_ID             = ''
 
@@ -122,7 +121,11 @@ function _M.GetPageNumber()
 
 	if image then
 		for domain, path in image:gmatch("%['([^']+)','[^']*',\"([^\"]+)\"") do
-			local image_url = domain .. (KeepParameters and path or path:gsub('%?.*$', ''))
+			if domain:find("one%-way%.work") then
+				path = path:gsub("%?.*$", "")
+			end
+
+			local image_url = domain .. path
 			TASK.PageLinks.Add(image_url)
 		end
 	end
